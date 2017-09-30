@@ -10,7 +10,7 @@ const get = (query, cb) => {
 
     https.get({
       hostname: 'www.recurse.com',
-      path: `/api/v1/profiles?query=${query}`,
+      path: `/api/v1/profiles?query=${encodeURIComponent(query.trim())}`,
       headers: {
         'Authorization': `Bearer ${token}`,
       }
@@ -24,8 +24,32 @@ const get = (query, cb) => {
       res.on('end', () => {
         const data = buffer.toString('ascii')
         const json = JSON.parse(data)
-        const names = json.map(profile => profile.name)
-        cb(names.join(', '))
+        const infos = json.map(profile => {
+          let info = profile.name
+          const { stints } = profile
+          const latest_stint = stints[stints.length-1]
+
+          switch (latest_stint.type) {
+            case 'retreat':
+              info += ` (${latest_stint.batch.short_name})`
+              break;
+            case 'employment':
+            case 'experimental':
+              info += ` (${latest_stint.title})`
+              break;
+            case 'residency':
+              info += ` (resident)`
+              break;
+            case 'research_fellowship':
+              info += ` (research fellow)`
+              break;
+            case 'facilitatorship':
+              info += ` (facilitator)`
+              break;
+          }
+          return info
+        })
+        cb(infos.join('\r'))
       })
     })
 }
@@ -52,6 +76,6 @@ server.on('listening', () => {
 })
 
 server.listen({
-  host: 'localhost',
-  port: 8888
+  host: '0.0.0.0',
+  port: 8888,
 })
