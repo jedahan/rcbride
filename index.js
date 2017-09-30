@@ -22,30 +22,36 @@ const get = (query, cb) => {
       })
 
       res.on('end', () => {
-        const json = JSON.parse(buffer)
+        const data = buffer.toString('ascii')
+        const json = JSON.parse(data)
         const names = json.map(profile => profile.name)
         cb(names.join(', '))
       })
     })
 }
 
-get('jonathan', names => {
-  console.log(names)
-})
-
 server.on('connection', socket => {
-  console.log(`connection from ${socket.remoteAddress}`)
+    console.log(`connection from ${socket.remoteAddress}`)
 
-  let buffer = ''
+    let buffer = ''
 
-  socket.on('data', chunk => buffer += chunk)
+    socket.on('data', chunk => {
+      const enterIndex = chunk.indexOf(0x0a)
+      if (enterIndex !== -1) {
+        buffer += chunk.slice(0, enterIndex)
 
-  socket.on('end', () => {
-    const query = buffer.toString('ascii')
-    get(query, names => {
-      socket.send(names)
+        const query = buffer.toString('ascii')
+        get(query, names => {
+          socket.write(names, 'ascii')
+        })
+      }
     })
-  })
+})
+server.on('listening', () => {
+  console.log(server.address())
 })
 
-server.listen(7777)
+server.listen({
+  host: 'localhost',
+  port: 8888
+})
