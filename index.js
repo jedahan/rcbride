@@ -49,6 +49,7 @@ const get = (query, cb) => {
           }
           return info
         })
+        buffer = ''
         cb(infos.join('\r'))
       })
     })
@@ -67,6 +68,7 @@ server.on('connection', socket => {
         const query = buffer.toString('ascii')
         get(query, names => {
           socket.write(names, 'ascii')
+          buffer = ''
         })
       }
     })
