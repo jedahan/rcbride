@@ -7,7 +7,6 @@ const get = (options, cb) => {
   const querystring = Object.entries(options)
       .map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')
 
-  console.log(querystring)
   https.get({
     hostname: 'www.recurse.com',
     path: `/api/v1/profiles?${querystring}`,
