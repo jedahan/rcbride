@@ -1,0 +1,10 @@
+{
+  "name": "rcbridge",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jonathan Dahan <hi@jonathan.is>",
+  "license": "MIT",
+  "dependencies": {
+    "standard": "^10.0.3"
+  }
+}
