@@ -23,29 +23,19 @@ const get = (options, cb) => {
       const json = JSON.parse(data)
 
       const infos = json.map(profile => {
-        let info = profile.name
         const { stints } = profile
         const latestStint = stints[stints.length - 1]
 
-        switch (latestStint.type) {
-          case 'retreat':
-            info += ` (${latestStint.batch.short_name})`
-            break
-          case 'employment':
-          case 'experimental':
-            info += ` (${latestStint.title})`
-            break
-          case 'residency':
-            info += ` (resident)`
-            break
-          case 'research_fellowship':
-            info += ` (research fellow)`
-            break
-          case 'facilitatorship':
-            info += ` (facilitator)`
-            break
-        }
-        return info
+        const title = ({
+          'retreat': latestStint.batch && latestStint.batch.short_name,
+          'employment': latestStint.title,
+          'experimental': latestStint.title,
+          'residency': 'resident',
+          'research_fellowship': 'research_fellow',
+          'facilitatorship': 'facilitator',
+        })[latestStint.type]
+
+        return `${profile.name} (${title})`
       })
 
       cb(infos.join('\r\n'))
