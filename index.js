@@ -81,5 +81,7 @@ server.listen({
   host: '0.0.0.0',
   port: 8888
 }, () => {
-  console.log(`listening on ${server.address()}`)
-})
+  const address = server.address()
+  console.log(`listening on ${address}`)
+}
+)
