@@ -24,16 +24,16 @@ const get = (options, cb) => {
 
       const infos = json.map(profile => {
         const { stints } = profile
-        const latestStint = stints[stints.length - 1]
+        const stint = stints[stints.length - 1]
 
         const title = ({
-          'retreat': latestStint.batch && latestStint.batch.short_name,
-          'employment': latestStint.title,
-          'experimental': latestStint.title,
+          'retreat': stint.batch && stint.batch.short_name,
+          'employment': stint.title,
+          'experimental': stint.title,
           'residency': 'resident',
           'research_fellowship': 'research_fellow',
           'facilitatorship': 'facilitator',
-        })[latestStint.type]
+        })[stint.type]
 
         return `${profile.name} (${title})`
       })
