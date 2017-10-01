@@ -48,7 +48,7 @@ const get = (options, cb) => {
         return info
       })
 
-      cb(infos.join('\r'))
+      cb(infos.join('\r\n'))
     })
   })
 }
