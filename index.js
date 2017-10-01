@@ -7,6 +7,7 @@ const get = (options, cb) => {
   const querystring = Object.entries(options)
       .map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')
 
+  console.log(querystring)
   https.get({
     hostname: 'www.recurse.com',
     path: `/api/v1/profiles?${querystring}`,
@@ -38,7 +39,7 @@ const get = (options, cb) => {
         return `${profile.name} (${title})`
       })
 
-      cb(infos.join('\r\n'))
+      cb(infos.join('\r'))
     })
   })
 }
@@ -53,13 +54,10 @@ server.on('connection', socket => {
     if (enterIndex !== -1) {
       buffer += chunk.slice(0, enterIndex)
 
-      const query = buffer.toString('ascii')
-      console.log(`got query: ${query}`)
-
-      const [scope, text] = query.split('!')
+      const [scope, query] = buffer.toString('ascii').split('!')
       const limit = 50
 
-      get({scope, text, limit}, names => {
+      get({scope, query, limit}, names => {
         socket.write(names, 'ascii')
         buffer = ''
       })
