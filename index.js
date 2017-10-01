@@ -2,28 +2,28 @@ const net = require('net')
 const https = require('https')
 const server = new net.Server()
 const token = process.env.RC_TOKEN
+const delimeter = 0x0b
+const query_separator = 0x1F // Ascii US (Unit Separator)
 
-console.log(`token is ${token}`)
-
-const get = (query, cb) => {
-    console.log(`got query: ${query}`)
+const get = (options, cb) => {
+    const querystring = Object.entries(options)
+      .map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')
 
     https.get({
       hostname: 'www.recurse.com',
-      path: `/api/v1/profiles?query=${encodeURIComponent(query.trim())}`,
+      path: `/api/v1/profiles?${querystring}`,
       headers: {
         'Authorization': `Bearer ${token}`,
       }
     }, (res) => {
       let buffer = ''
 
-      res.on('data', (data) => {
-        buffer += data
-      })
+      res.on('data', (data) => { buffer += data })
 
       res.on('end', () => {
         const data = buffer.toString('ascii')
         const json = JSON.parse(data)
+
         const infos = json.map(profile => {
           let info = profile.name
           const { stints } = profile
@@ -49,7 +49,7 @@ const get = (query, cb) => {
           }
           return info
         })
-        buffer = ''
+
         cb(infos.join('\r'))
       })
     })
@@ -66,18 +66,22 @@ server.on('connection', socket => {
         buffer += chunk.slice(0, enterIndex)
 
         const query = buffer.toString('ascii')
-        get(query, names => {
+        console.log(`got query: ${query}`)
+
+        const [scope, text] = query.split('!')
+        const limit = 50
+
+        get({scope, text, limit}, names => {
           socket.write(names, 'ascii')
           buffer = ''
         })
       }
     })
 })
-server.on('listening', () => {
-  console.log(server.address())
-})
 
 server.listen({
   host: '0.0.0.0',
   port: 8888,
+}, () => {
+             console.log(`listening on ${server.address()}`)
 })
