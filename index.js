@@ -24,7 +24,7 @@ const get = (options, cb) => {
       const json = JSON.parse(data)
 
       const infos = json.map(profile => {
-        const { stints } = profile
+        const { name, stints, phone_number, email } = profile
         const stint = stints[stints.length - 1]
 
         const title = ({
@@ -36,7 +36,7 @@ const get = (options, cb) => {
           'facilitatorship': 'facilitator',
         })[stint.type]
 
-        return `${profile.name} (${title})`
+        return [name, title, phone_number, email].join(',')
       })
 
       cb(infos.join('\r'))
